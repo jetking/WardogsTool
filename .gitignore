@@ -1,0 +1,20 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Wrangler
+.wrangler
+.dev.vars
+
+# 环境变量与密钥（示例文件除外）
+.env
+.env.*
+!.env.example
+
+# 测试产物
+playwright-report
+test-results
+
+# 系统文件
+.DS_Store

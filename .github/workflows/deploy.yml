@@ -1,0 +1,95 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+
+jobs:
+  staging:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run build
+      - name: 部署到 staging
+        run: pnpm exec wrangler deploy --env staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  production:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 校验版本标签
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${PKG_VERSION}" ]; then
+            echo "标签 ${GITHUB_REF_NAME} 与 package.json 版本 ${PKG_VERSION} 不一致"
+            exit 1
+          fi
+
+      - name: 确认标签提交已进入 main
+        run: |
+          git fetch origin main --depth=1
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "标签提交尚未合并到 main，禁止发布生产"
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run build
+
+      - name: 部署到 production
+        id: deploy
+        run: |
+          pnpm exec wrangler deploy --env="" 2>&1 | tee deploy.log
+          grep -Eo 'https://[A-Za-z0-9.-]+workers\.dev[^ ]*' deploy.log | head -1 > deploy-url.txt || true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: 冒烟检查（站点可访问性与计算器页面）
+        run: |
+          URL=$(cat deploy-url.txt)
+          if [ -z "$URL" ]; then
+            echo "::warning::未能从部署输出解析 workers.dev 地址，跳过冒烟检查"
+            exit 0
+          fi
+          curl -fsS "$URL/" -o /dev/null
+          curl -fsS "$URL/wardogs/mortar" | grep -q '<div id="root">'
+
+      - name: 生成发布说明
+        run: gh release create "${GITHUB_REF_NAME}" --generate-notes --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

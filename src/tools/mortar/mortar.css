@@ -1,0 +1,112 @@
+.mortar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mortar-coords {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .mortar-coords {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.mortar-coords fieldset {
+  margin: 0;
+  padding: 12px 16px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.mortar-coords legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+
+.mortar-coords-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.mortar-settings {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 16px;
+}
+
+.mortar-settings summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.mortar-settings-body {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 16px;
+}
+
+.mortar-settings-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.mortar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.mortar-result {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.mortar-result dl {
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.mortar-result-row {
+  display: grid;
+  gap: 2px;
+}
+
+.mortar-result-row dt {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.mortar-result-row dd {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.mortar-result-row strong {
+  font-size: 1.6rem;
+  color: var(--accent);
+}
+
+.mortar-result-sub {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.mortar-result-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
