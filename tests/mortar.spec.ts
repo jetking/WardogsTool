@@ -63,6 +63,33 @@ test('重置清空坐标输入与结果', async ({ page }) => {
   await expect(page.getByRole('region', { name: '计算结果' })).toHaveCount(0)
 })
 
+test('刷新页面后保留已填写的坐标', async ({ page }) => {
+  await page.goto('/mortar')
+  await page.getByLabel('迫击炮 X 坐标').fill('73.73')
+  await page.getByLabel('迫击炮 Y 坐标').fill('64.32')
+  await page.getByLabel('目标 X 坐标').fill('75.75')
+  await page.getByLabel('目标 Y 坐标').fill('59.59')
+
+  await page.reload()
+
+  await expect(page.getByLabel('迫击炮 X 坐标')).toHaveValue('73.73')
+  await expect(page.getByLabel('迫击炮 Y 坐标')).toHaveValue('64.32')
+  await expect(page.getByLabel('目标 X 坐标')).toHaveValue('75.75')
+  await expect(page.getByLabel('目标 Y 坐标')).toHaveValue('59.59')
+})
+
+test('重置后清除本地保存的坐标，刷新页面不再恢复', async ({ page }) => {
+  await page.goto('/mortar')
+  await page.getByLabel('迫击炮 X 坐标').fill('73.73')
+  await page.getByLabel('目标 X 坐标').fill('75.75')
+  await page.getByRole('button', { name: '重置' }).click()
+
+  await page.reload()
+
+  await expect(page.getByLabel('迫击炮 X 坐标')).toHaveValue('')
+  await expect(page.getByLabel('目标 X 坐标')).toHaveValue('')
+})
+
 test('未修改设置时点击计算不写入本地偏好', async ({ page }) => {
   await page.goto('/mortar')
   await page.getByLabel('迫击炮 X 坐标').fill('0')

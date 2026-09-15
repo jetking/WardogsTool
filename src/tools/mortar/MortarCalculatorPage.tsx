@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useState, type FormEvent } from 'react'
 import { CoordinateInput } from './components/CoordinateInput'
 import { ResultPanel } from './components/ResultPanel'
 import {
@@ -9,18 +9,19 @@ import {
   type MortarInput,
 } from './lib/calculate'
 import type { YAxisDirection } from './lib/coordinates'
-import { loadPreferences, savePreferences } from './lib/preferences'
+import { loadCoordinates, loadPreferences, saveCoordinates, savePreferences } from './lib/preferences'
 import './mortar.css'
 
 export function MortarCalculatorPage() {
   const yAxisSelectId = useId()
   const [input, setInput] = useState<MortarInput>(() => {
     const preferences = loadPreferences()
+    const coordinates = loadCoordinates()
     return {
-      mortarX: '',
-      mortarY: '',
-      targetX: '',
-      targetY: '',
+      mortarX: coordinates.mortarX ?? '',
+      mortarY: coordinates.mortarY ?? '',
+      targetX: coordinates.targetX ?? '',
+      targetY: coordinates.targetY ?? '',
       metersPerUnit: preferences.metersPerUnit ?? String(DEFAULT_METERS_PER_UNIT),
     }
   })
@@ -31,6 +32,12 @@ export function MortarCalculatorPage() {
   // 仅在用户真正修改过设置后才持久化，避免把未调整的默认值冻结进 localStorage，
   // 导致默认值更新后旧偏好继续覆盖新默认值
   const [settingsTouched, setSettingsTouched] = useState(false)
+
+  const { mortarX, mortarY, targetX, targetY } = input
+  // 坐标随输入即时保存，刷新页面后恢复；重置清空时会移除存储项
+  useEffect(() => {
+    saveCoordinates({ mortarX, mortarY, targetX, targetY })
+  }, [mortarX, mortarY, targetX, targetY])
 
   const fieldErrors = result && !result.ok ? result.fieldErrors : {}
 
