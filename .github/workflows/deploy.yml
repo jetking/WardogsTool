@@ -87,7 +87,7 @@ jobs:
             exit 0
           fi
           curl -fsS "$URL/" -o /dev/null
-          curl -fsS "$URL/wardogs/mortar" | grep -q '<div id="root">'
+          curl -fsS "$URL/mortar" | grep -q '<div id="root">'
 
       - name: 生成发布说明
         run: gh release create "${GITHUB_REF_NAME}" --generate-notes --latest

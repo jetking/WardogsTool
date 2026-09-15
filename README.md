@@ -2,7 +2,9 @@
 
 面向 WarDogs（战狗）玩家的游戏工具站，兼容手机、平板与桌面端。当前提供：
 
-- **迫击炮计算器**（`/wardogs/mortar`）：输入迫击炮与目标的游戏内坐标，计算两点直线距离和从迫击炮指向目标的方位角（正北 0°，顺时针递增）。计算全部在浏览器本地完成。
+- **迫击炮计算器**（`/mortar`）：输入迫击炮与目标的游戏内坐标，计算两点直线距离和从迫击炮指向目标的方位角（正北 0°，顺时针递增）。计算全部在浏览器本地完成。
+
+线上地址：https://wardogs.campone.cc（工具列表在 `/`，计算器在 `/mortar`）。
 
 ## 技术栈
 
@@ -62,6 +64,18 @@ wrangler.jsonc          # Workers 配置
 
 - staging：`main` 分支通过全部检查后自动部署（Worker 名称 `wardogs-tools-staging`）。
 - production：推送 `vX.Y.Z` 标签触发（Worker 名称 `wardogs-tools`）。流水线会校验标签与 `package.json` 版本一致、标签提交已进入 `main`，部署后执行冒烟检查并生成 GitHub Release 发布说明。同一环境的部署串行执行。
+
+### 本地一键部署
+
+```bash
+scripts/deploy.sh              # 部署到 staging（默认）
+scripts/deploy.sh production   # 部署到生产
+```
+
+脚本依次执行依赖安装、lint、类型检查、单元测试、构建与 `wrangler deploy`（端到端测试由 CI 负责）。前置条件（满足其一）：
+
+1. 在交互终端执行过 `pnpm exec wrangler login` 完成 OAuth 授权；或
+2. 设置了环境变量 `CLOUDFLARE_API_TOKEN` 与 `CLOUDFLARE_ACCOUNT_ID`。
 
 ### 一次性配置
 

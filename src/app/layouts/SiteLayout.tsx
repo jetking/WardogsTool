@@ -5,11 +5,11 @@ export function SiteLayout() {
     <div className="site">
       <header className="site-header">
         <div className="container site-header-inner">
-          <Link to="/wardogs" className="site-brand">
+          <Link to="/" className="site-brand">
             WarDogs 工具
           </Link>
           <nav aria-label="站点导航">
-            <Link to="/wardogs">工具列表</Link>
+            <Link to="/">工具列表</Link>
           </nav>
         </div>
       </header>
